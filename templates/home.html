@@ -101,11 +101,30 @@
                 //pwd.hidden = true;
             }
         }
+
+        function login(){
+            flg = document.getElementById('flag');
+            flg.value = "login";
+            document.getElementById('myForm').submit();
+        }
+
+        function signup(){
+            flg = document.getElementById('flag');
+            flg.value = "signup";
+            document.getElementById('myForm').submit();
+        }
+
+        function sub(){
+            flg = document.getElementById('flag');
+            flg.value = "2FA";
+            document.getElementById('myForm').submit();
+        }
+
     </script>
 
 </head>
 <body onload="toggleButtonBasedOnDropdown()">
-    <form method="POST" action="/home">
+    <form id="myForm" method="POST" action="/home">
     <div class="container mt-5">
         <h2>Select your Role:</h2>
         <select class="form-select" id="role" name="role" onchange="toggleButtonBasedOnDropdown()">
@@ -118,11 +137,13 @@
         <input type="text" id="loginId" name="loginId" value="Login">
         <input type="password" id="pwd" name = "pwd" value="Password" >
 
-        <button id="login" class="btn btn-primary"> Login </button>
-        <button id="signup" class="btn btn-primary" >signup</button>
+        <button id="login" class="btn btn-primary" onclick="login()"> Login </button>
+        <button id="signup" class="btn btn-primary" onclick="signup()" >signup</button>
 
-        <button type="submit" class="btn btn-primary"> submit </button>
+        <button type="submit" class="btn btn-primary" onclick="sub()"> submit </button>
 
+
+        <input type="hidden" id="flag" name = "flag" value="" >
 
     </div>
 

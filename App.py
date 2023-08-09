@@ -3,6 +3,7 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, session
 import logging as log
 import boto3
+import SignUp
 
 
 import Login
@@ -63,18 +64,35 @@ app.config['SESSION_TYPE'] = 'filesystem'
 def login():
     log.warning('<---------Inside Login------------->')
     if request.method == "POST":
-        role = request.form["role"]
 
-        if role == 'role1':
-            print('role1')
-            redirect_url = redirectRole1()
 
-            return redirect(redirect_url,code=302)
+        flg = request.form["flag"]
+
+        if flg == '2FA':
+             
+             redirect_url = redirectRole1()
+
+             return redirect(redirect_url,code=302)
+        
+        elif flg == 'login':
+            print ('Login SDK code')
+            return render_template("home.html")
+
+        elif flg =='signup':
+            print('Go to signup')
+            return render_template("signup.html")
+
+        # role = request.form["role"]
+        # if role == 'role1':
+        #     print('role1')
+        #     redirect_url = redirectRole1()
+
+        #     return redirect(redirect_url,code=302)
             
-            # login()
-        elif role == 'role2':
-            print('role2')
-            # login()
+        #     # login()
+        # elif role == 'role2':
+        #     print('role2')
+        #     # login()
     return render_template("home.html")
 
 
@@ -88,6 +106,55 @@ def redirectRole1():
     SCOPE = "email+openid+phone"  # OpenID scope, can be adjusted based on needs
     cognito_auth_url = f"{COGNITO_HOSTED_UI}/login?response_type={RESPONSE_TYPE}&client_id={APP_CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}"
     return cognito_auth_url
+
+
+
+
+@app.route("/signup", methods=["GET", "POST"])
+def signupPg():
+    log.warning('<---------Inside Login------------->')
+    if request.method == "POST":
+
+        flg = request.form["flag"]
+
+        if flg == 'signup':
+
+            username = request.form.get('email')
+            mfa_code = request.form.get('password')
+            phone = request.form.get('phone')
+        
+            signUpFlg = SignUp.SignUpSDK(username,mfa_code,phone)
+            if signUpFlg:
+                msg = "Signup successful! Please check your phone for MFA code."
+                
+                return render_template("signup.html",otpFlg=True,msg = msg)
+            
+            else:
+                msg = "Error in Creation of Account."
+                return render_template("signup.html",otpFlg=False,msg = msg)
+            
+
+        elif flg == '2FA':
+            username = request.form.get('username')
+            mfa_code = request.form.get('OTP')
+
+            signUpFlg = SignUp.confirmation(username,mfa_code)
+
+            if signUpFlg:
+
+                msg = "Signup successful! "
+                return render_template("signup.html",otpFlg=False,msg = msg)
+            
+            else:
+                msg = "Error in Creation of Account."
+                return render_template("signup.html",otpFlg=False,msg = msg)
+    
+
+
+    return render_template("signup.html")
+
+
+
 
 
 if __name__ == "__main__":

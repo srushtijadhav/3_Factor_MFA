@@ -1,9 +1,10 @@
 from flask import Flask , render_template , url_for
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session,Response
 import logging as log
 import boto3
 import SignUp
+import json
 
 
 import Login
@@ -69,13 +70,30 @@ def login():
         flg = request.form["flag"]
 
         if flg == '2FA':
-             
+             log.warning('<---------Inside 2FA------------->')
              redirect_url = redirectRole1()
 
              return redirect(redirect_url,code=302)
         
         elif flg == 'login':
             print ('Login SDK code')
+            log.warning('<---------Inside 3FA------------->')
+            username = request.form.get('email')
+            mfa_code = request.form.get('password')
+
+            resp,ses = SignUp.SignIn()
+
+            if resp == 'Error':
+                return render_template("home.html",msg=resp,username=username)
+            
+            elif resp == 'No MFA':
+                return render_template("home.html",msg='logged in',username=username)
+            
+            elif resp == 'MFA':
+                session = ses
+                return render_template("OTP.html",msg='MFA',username=username,)
+        
+
             return render_template("home.html")
 
         elif flg =='signup':
@@ -155,6 +173,23 @@ def signupPg():
 
 
 
+@app.route("/submit-otp", methods=["GET", "POST"])
+def submitOtp():
+    log.warning('<---------Inside Login------------->')
+    if request.method == "POST":
+        username = request.form.get('email')
+        mfa_code = request.form.get('otp')
+        ses = request['session']
+
+
+        try:
+            flg,resp = SignUp.signin_mfa(username,mfa_code,ses)
+
+        except Exception as e:
+            log.warning('<----------------Exception Occured---------------->'+e)
+
+
+        return render_template("home.html",msg='logged in',username=username)
 
 
 if __name__ == "__main__":

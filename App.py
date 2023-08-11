@@ -79,9 +79,9 @@ def login():
             print ('Login SDK code')
             log.warning('<---------Inside 3FA------------->')
             username = request.form.get('email')
-            mfa_code = request.form.get('password')
+            pwd = request.form.get('password')
 
-            resp,ses = SignUp.SignIn()
+            resp,ses = SignUp.SignIn(username,pwd)
 
             if resp == 'Error':
                 return render_template("home.html",msg=resp,username=username)
@@ -138,10 +138,10 @@ def signupPg():
         if flg == 'signup':
 
             username = request.form.get('email')
-            mfa_code = request.form.get('password')
+            pwd = request.form.get('password')
             phone = request.form.get('phone')
         
-            signUpFlg = SignUp.SignUpSDK(username,mfa_code,phone)
+            signUpFlg = SignUp.SignUpSDK(username,pwd,phone)
             if signUpFlg:
                 msg = "Signup successful! Please check your phone for MFA code."
                 
@@ -173,9 +173,9 @@ def signupPg():
 
 
 
-@app.route("/submit-otp", methods=["GET", "POST"])
+@app.route("/submitotp", methods=["GET", "POST"])
 def submitOtp():
-    log.warning('<---------Inside Login------------->')
+    log.warning('<---------Inside OTP------------->')
     if request.method == "POST":
         username = request.form.get('email')
         mfa_code = request.form.get('otp')
@@ -190,6 +190,8 @@ def submitOtp():
 
 
         return render_template("home.html",msg='logged in',username=username)
+    else:
+        return render_template("OTP.html")
 
 
 if __name__ == "__main__":

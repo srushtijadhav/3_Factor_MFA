@@ -76,8 +76,8 @@ def login():
         elif flg == 'login':
             print ('Login SDK code')
             log.warning('<---------Inside 3FA------------->')
-            username = request.form.get('email')
-            pwd = request.form.get('password')
+            username = request.form.get('loginId')
+            pwd = request.form.get('pwd')
 
             resp,ses = SignUp.SignIn(username,pwd)
 
@@ -89,7 +89,7 @@ def login():
             
             elif resp == 'MFA':
                 session = ses
-                return render_template("OTP.html",msg='MFA',username=username,)
+                return render_template("OTP-SignIn.html",msg='MFA',username=username,)
         
 
             return render_template("home.html")
@@ -143,7 +143,7 @@ def signupPg():
             if signUpFlg:
                 msg = "Signup successful! Please check your phone for MFA code."
                 
-                return render_template("signup.html",otpFlg=True,msg = msg)
+                return render_template("OTP.html",otpFlg=True,msg = msg,username=username)
             
             else:
                 msg = "Error in Creation of Account."
@@ -169,6 +169,26 @@ def signupPg():
 
     return render_template("signup.html")
 
+@app.route("/submit-otp", methods=["GET", "POST"])
+def submitOtpSignUp():
+    log.warning('<---------Inside Submit-Otp SignUP------------->')
+    if request.method == "POST":
+            username = request.form.get('username')
+            mfa_code = request.form.get('otp')
+            try:
+                signUpFlg = SignUp.confirmation(username,mfa_code)
+
+                if signUpFlg:
+
+                    msg = "Signup successful! "
+                    return render_template("signup.html",otpFlg=False,msg = msg)
+                
+                else:
+                    msg = "Error in Creation of Account."
+                    return render_template("signup.html",otpFlg=False,msg = msg)
+            except Exception as e:
+                log.warning('<----Error--------------->'+str(e))
+                return render_template("signup.html",otpFlg=False)
 
 
 @app.route("/submitotp", methods=["GET", "POST"])

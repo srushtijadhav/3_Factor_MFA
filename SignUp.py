@@ -18,8 +18,10 @@ def SignUpSDK(username,password,phone_number):
     log.warning('<----------------Inside SignUp SignUpSDK----------------->')
 
     client = boto3.client('cognito-idp', region_name='eu-west-1')
-    USER_POOL_ID = 'eu-west-1_zKGLIBXYH'
-    CLIENT_ID = '48nhuo85q76h6l3to96rf8f80m'
+    #USER_POOL_ID = 'eu-west-1_zKGLIBXYH'
+    #CLIENT_ID = '48nhuo85q76h6l3to96rf8f80m'
+    USER_POOL_ID = 'eu-west-1_gcF3BMfzC'
+    CLIENT_ID = '1e26gho07uf67202g66eeshaas'
     try:
             response = client.sign_up(
                 ClientId=CLIENT_ID,
@@ -27,8 +29,8 @@ def SignUpSDK(username,password,phone_number):
                 Password=password,
                 UserAttributes=[
                     {
-                        'Name': 'phone_number',
-                        'Value': phone_number
+                        'Name': 'email',
+                        'Value': username
                     },
                 ]
             )
@@ -38,6 +40,8 @@ def SignUpSDK(username,password,phone_number):
     except Exception as e:
             log.warning("<------------Failed to signup: ------->"+str(e))
             return False
+    except client.exceptions.UsernameExistsException:
+            log.warning('Username already exists.')
  
     return None
 
@@ -46,8 +50,8 @@ def confirmation(username ,mfa_code ):
     log.warning('<----------------Inside SignUp confirmation----------------->')
 
     client = boto3.client('cognito-idp', region_name='eu-west-1')
-    USER_POOL_ID = 'eu-west-1_zKGLIBXYH'
-    CLIENT_ID = '48nhuo85q76h6l3to96rf8f80m'
+    USER_POOL_ID = 'eu-west-1_gcF3BMfzC'
+    CLIENT_ID = '1e26gho07uf67202g66eeshaas'
     try:
         response = client.confirm_sign_up(
             ClientId=CLIENT_ID,
@@ -59,7 +63,7 @@ def confirmation(username ,mfa_code ):
         return  True
     except Exception as e:
 
-        log.WARNING("<----------Failed to confirm signup:-------->"+e)
+        log.WARNING("<----------Failed to confirm signup:-------->"+str(e))
         return False
     
     return None
@@ -68,8 +72,10 @@ def confirmation(username ,mfa_code ):
 def SignIn(username,pwd):
      log.warning('<----------------Inside SignIn confirmation----------------->')
      client = boto3.client('cognito-idp', region_name='eu-west-1')
-     USER_POOL_ID = 'eu-west-1_zKGLIBXYH'
-     CLIENT_ID = '48nhuo85q76h6l3to96rf8f80m'
+    #  USER_POOL_ID = 'eu-west-1_zKGLIBXYH'
+    #  CLIENT_ID = '48nhuo85q76h6l3to96rf8f80m'
+     USER_POOL_ID = 'eu-west-1_gcF3BMfzC'
+     CLIENT_ID = '1e26gho07uf67202g66eeshaas'
      try:
         response = client.initiate_auth(
             ClientId=CLIENT_ID,
@@ -82,13 +88,13 @@ def SignIn(username,pwd):
 
         if response.get('ChallengeName') == 'SMS_MFA':
             log.warning('<----------------Inside SignIn MFA requested----------------->')
-            return 'MFA', response['session']
+            return 'MFA', response['Session']
 
-        return 'No MFA', response['session']
+        return 'No MFA', response['Session']
 
      except Exception as e:
-        log.warning('<----------Exception occured------->'+e)
-        return 'Error', response['session']
+        log.warning('<----------Exception occured------->'+str(e))
+        return 'Error', response['Session']
 
 
 

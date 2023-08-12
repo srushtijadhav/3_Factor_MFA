@@ -5,8 +5,6 @@ import logging as log
 import boto3
 import SignUp
 import json
-
-
 import Login
 
 
@@ -192,6 +190,40 @@ def submitOtp():
         return render_template("home.html",msg='logged in',username=username)
     else:
         return render_template("OTP.html")
+
+
+
+
+
+@app.route('/awsRedirect',methods=['GET'])
+def awsRedirect():
+    log.warning('<---------Inside awsRedirect------------->')
+
+    if request.method == "GET":
+
+        if 'username' in session:
+            username = session['username']
+        #flg = session['flg']
+        flg = request.args.get('flg', 'default-username')
+
+        if flg == '2FA':
+            arn = 'arn:aws:iam::474672952960:role/dev'
+            
+        elif flg == '3FA':
+            arn = 'arn:aws:iam::474672952960:role/sec'
+        else:
+            return redirect('home.html')
+        
+        try:
+            redirectUrl = SignUp.AwsRedirect(arn)
+        except Exception as e:
+            log.warning('<----------Exception Occured---------->')
+            log.warning('Error---------------->'+str(e))
+        return redirect(redirectUrl)
+
+        
+
+
 
 
 if __name__ == "__main__":

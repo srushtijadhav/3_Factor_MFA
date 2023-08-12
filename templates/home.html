@@ -1,160 +1,218 @@
-<!-- <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Page</title>
-     Include Bootstrap CSS 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        Login
-                    </div>
-                    <div class="card-body">
-                        <form>
-                            <div class="mb-3">
-                                <label for="username" class="form-label">Username</label>
-                                <input type="text" class="form-control" id="username" name="username" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="password" name="password" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Role</label>
-                                <select id="fruitSelect">
-                                    <option value="role1">Role 1</option>
-                                    <option value="role2">Role 2</option>
-                                    <option value="role3">Role 3</option>
-                                </select>
-                            </div>
-
-
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-primary">Login</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-     Include Bootstrap JS (optional) 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html> -->
-
 
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Srushti's Login Page</title>
+
     <!-- Include Bootstrap CSS -->
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
+</head>
+
+<body onload="toggleButtonBasedOnDropdown()">
+
+ 
+
+    <form id="myForm" method="POST" action="/home">
+
+        <div class="container mt-5">
+
+            <h2>Select your Role:</h2>
+
+            <select class="form-select" id="role" name="role" onchange="toggleButtonBasedOnDropdown()">
+
+                <option value="role1">Role 1</option>
+
+                <option value="role2">Role 2</option>
+
+            
+
+            </select>
+
+ 
+
+ 
+
+            <input type="text" id="loginId" name="loginId" value="Login">
+
+            <input type="password" id="pwd" name = "pwd" value="Password" >
+
+ 
+
+            <button id="login" type="button" class="btn btn-primary" > Login </button>
+
+            <button id="signup" type="button" class="btn btn-primary" >signup</button>
+
+ 
+
+            <button type="button" id="sub" class="btn btn-primary"> submit </button>
+
+ 
+
+ 
+
+            <input type="hidden" id="flag" name = "flag" value="" >
+
+ 
+
+        </div>
+
+        <div class="d-grid">
+
+            
+
+            <!-- <input type="submit" class="btn btn-primary" value="Login"> -->
+
+        </div>
+
+   
+
+    </form>
+
+    <!-- Include Bootstrap JS (optional) -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        function toggleButtonBasedOnDropdown() {
-           // window.alert("Hi")
-            var dropdown = document.getElementById('role');
-            var selectedValue = dropdown.options[dropdown.selectedIndex].value;
-            
-            var button1 = document.getElementById('login');
-            var button2 = document.getElementById('signup');
-            var button3 = document.getElementById('submit');
 
-            var username = document.getElementById('loginId');
-            var pwd = document.getElementById('pwd');
+ 
 
-            if (selectedValue === 'role2') {
-                // button1.style.display = 'block';
-                // button2.style.display = 'block';
-                // button3.style.display = 'none';
-                 username.style.display = 'block';
-                 pwd.style.display = 'block';
+            function toggleButtonBasedOnDropdown() {
 
-                button1.hidden = false;
-                button2.hidden = false;
-                button3.hidden = true;
-                //username.hidden = false;
-                //pwd.hidden = false;
+                // window.alert("Hi")
 
-            } else {
-                // button1.style.display = 'none';
-                // button2.style.display = 'none';
-                // button3.style.display = 'block';
-                 username.style.display = 'none';
-                 pwd.style.display = 'none';
-                button1.hidden = true;
-                button2.hidden = true;
-                button3.hidden = false;
-                //username.hidden = true;
-                //pwd.hidden = true;
+                var dropdown = document.getElementById('role');
+
+                var selectedValue = dropdown.options[dropdown.selectedIndex].value;
+
+                
+
+                var button1 = document.getElementById('login');
+
+                var button2 = document.getElementById('signup');
+
+                var button3 = document.getElementById('sub');
+
+ 
+
+                var username = document.getElementById('loginId');
+
+                var pwd = document.getElementById('pwd');
+
+ 
+
+                if (selectedValue === 'role2') {
+
+                    // button1.style.display = 'block';
+
+                    // button2.style.display = 'block';
+
+                    // button3.style.display = 'none';
+
+                    username.style.display = 'block';
+
+                    pwd.style.display = 'block';
+
+ 
+
+                    button1.hidden = false;
+
+                    button2.hidden = false;
+
+                    button3.hidden = true;
+
+                    //username.hidden = false;
+
+                    //pwd.hidden = false;
+
+ 
+
+                } else {
+
+                    // button1.style.display = 'none';
+
+                    // button2.style.display = 'none';
+
+                    // button3.style.display = 'block';
+
+                    username.style.display = 'none';
+
+                    pwd.style.display = 'none';
+
+                    button1.hidden = true;
+
+                    button2.hidden = true;
+
+                    button3.hidden = false;
+
+                    //username.hidden = true;
+
+                    //pwd.hidden = true;
+
+                }
+
             }
-        }
 
-        function login(){
-            flg = document.getElementById('flag');
-            flg.value = "login";
-            document.getElementById('myForm').submit();
-        }
+ 
 
-        function signup(){
-            flg = document.getElementById('flag');
-            flg.value = "signup";
-            document.getElementById('myForm').submit();
-        }
+            document.addEventListener("DOMContentLoaded", () => {
 
-        function sub(){
-            flg = document.getElementById('flag');
-            flg.value = "2FA";
-            document.getElementById('myForm').submit();
-        }
+                toggleButtonBasedOnDropdown();
+
+            });
+
+  
+
+            document.getElementById("login").onclick = function (event) {
+
+                flg = document.getElementById('flag');
+
+                flg.value = "login";
+
+                document.getElementById('myForm').submit();
+
+            };
+
+            document.getElementById("signup").onclick = function (event) {
+
+                flg = document.getElementById('flag');
+
+                flg.value = "signup";
+
+                document.getElementById('myForm').submit();
+
+            };
+
+ 
+
+            document.getElementById("sub").onclick = function (event) {
+
+                flg = document.getElementById('flag');
+
+                flg.value = "2FA";
+
+                alert(flg.value);
+
+                document.getElementById('myForm').submit();
+
+            };
+
+ 
+
+ 
 
     </script>
 
-</head>
-<body onload="toggleButtonBasedOnDropdown()">
-    <form id="myForm" method="POST" action="/home">
-    <div class="container mt-5">
-        <h2>Select your Role:</h2>
-        <select class="form-select" id="role" name="role" onchange="toggleButtonBasedOnDropdown()">
-            <option value="role1">Role 1</option>
-            <option value="role2">Role 2</option>
-           
-        </select>
-
-
-        <input type="text" id="loginId" name="loginId" value="Login">
-        <input type="password" id="pwd" name = "pwd" value="Password" >
-
-        <button id="login" class="btn btn-primary" onclick="login()"> Login </button>
-        <button id="signup" class="btn btn-primary" onclick="signup()" >signup</button>
-
-        <button type="submit" class="btn btn-primary" onclick="sub()"> submit </button>
-
-
-        <input type="hidden" id="flag" name = "flag" value="" >
-
-    </div>
-
-
-    <div class="d-grid">
-        
-        <!-- <input type="submit" class="btn btn-primary" value="Login"> -->
-    </div>
-    <!-- Include Bootstrap JS (optional) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    </form>
-    </body>
 </body>
+
+ 
+
 </html>

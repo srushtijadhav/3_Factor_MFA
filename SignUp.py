@@ -3,6 +3,9 @@ import boto3
 from flask import Flask, request, render_template_string,jsonify
 import logging as log
 import uuid
+import json
+import requests
+
 # Initialize the boto3 client for Cognito
 # client = boto3.client('cognito-idp', region_name='eu-west-1')
 
@@ -169,11 +172,11 @@ def compare(imgFile, username):
 
     log.warning('<----------------Inside SignUp compare----------------->')
 
-    AWS_ACCESS_KEY = 'YOUR_ACCESS_KEY'
-    AWS_SECRET_KEY = 'YOUR_SECRET_KEY'
-    REGION_NAME = 'us-west-2'
-    BUCKET_NAME = 'your-s3-bucket-name'
-    DYNAMODB_TABLE_NAME = 'your-dynamodb-table-name'
+    AWS_ACCESS_KEY = 'AKIAW5BFWO2AKMY5FNMW'
+    AWS_SECRET_KEY = 'NLY4JWKeb6drm0ajxXRugMs4LVSezCJmSuUz4Cln'
+    REGION_NAME = 'eu-west-1'
+    BUCKET_NAME = 'signin-storage'
+    DYNAMODB_TABLE_NAME = 'users'
 
     s3 = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY, aws_secret_access_key=AWS_SECRET_KEY, region_name=REGION_NAME)
     dynamodb = boto3.resource('dynamodb', aws_access_key_id=AWS_ACCESS_KEY, aws_secret_access_key=AWS_SECRET_KEY, region_name=REGION_NAME)
@@ -228,4 +231,54 @@ def compare(imgFile, username):
         code = 500
 
     return returnStr,code
+
+
+
+def AwsRedirect(roleAR):
+    log.warning('<----------------Inisde  SignUp  AWSRedirect------------>')
+
+    #  2FA arn:aws:iam::474672952960:role/dev
+    #  3FA  arn:aws:iam::474672952960:role/sec 
+    sts_client = boto3.client('sts')
+    
+    # Assume role to get temporary credentials
+    assumed_role = sts_client.assume_role(
+        #RoleArn=roleAR,
+        RoleArn = 'arn:aws:iam::474672952960:role/role_to_access_s3',
+        RoleSessionName="ConsoleAccessSession"
+    )
+
+    # Get federation token using the assumed role's temporary credentials
+    session = {
+        "sessionId": assumed_role['Credentials']['AccessKeyId'],
+        "sessionKey": assumed_role['Credentials']['SecretAccessKey'],
+        "sessionToken": assumed_role['Credentials']['SessionToken']
+    }
+    
+    # Get sign-in token using federation token
+    request_parameters = "?Action=getSigninToken"
+    request_parameters += "&Session=" + requests.utils.quote(json.dumps(session))
+    request_url = "https://signin.aws.amazon.com/federation" + request_parameters
+
+    try:
+        response = requests.get(request_url)
+        
+        sign_in_token = response.json()["SigninToken"]
+        
+        # Construct login URL
+        request_parameters = "?Action=login"
+        request_parameters += "&Issuer=requester"
+        request_parameters += "&Destination=" + requests.utils.quote("https://console.aws.amazon.com/")
+        request_parameters += "&SigninToken=" + sign_in_token
+        request_url = "https://signin.aws.amazon.com/federation" + request_parameters
+
+        return (request_url)
+    except Exception as e:
+        log.warning('<----------------Exception Occured---------->')
+        log.warning('Error------>'+str(e))
+        return(500)
+
+    return (500)
+
+    #return redirect(request_url, code=302)
         

@@ -323,10 +323,10 @@ def signIn3():
             if signUpFlg:
                 log.warning('For Sign IN')
                 try:
-                    with open('images\captured_image.png', 'rb') as file:
-                        image_data = file.read()
+                    # with open('images\captured_image.png', 'rb') as file:
+                    #     image_data = file.read()
 
-                    
+                    image_data='images\captured_image.png'
                     matches,code = SignUp.compare(image_data,username)
 
                     if code == 200:
@@ -348,9 +348,9 @@ def signIn3():
 
                 print('For SignUP')
                 try:
-                    with open('images\captured_image.png', 'rb') as file:
-                        image_data = file.read()
-                
+                    # with open('images\captured_image.png', 'rb') as file:
+                    #     image_data = file
+                    image_data = 'images\captured_image.png'
                     ref,code = SignUp.upload(image_data,username)
                     
 

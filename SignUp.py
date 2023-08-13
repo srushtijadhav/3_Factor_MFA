@@ -215,12 +215,13 @@ def upload(file,uniqueName):
 
     # Upload image to S3
     try:
-        s3.upload_fileobj(file, BUCKET_NAME, uniqueName)
+        with open(file, 'rb') as file:
+            s3.upload_fileobj(file, BUCKET_NAME, uniqueName)
         # Store reference in DynamoDB
         image_reference = {
             'ImageID': str(uuid.uuid4()),
             'S3URL': f"https://{BUCKET_NAME}.s3.{REGION_NAME}.amazonaws.com/{uniqueName}",
-            'Filename': uniqueName
+            'rekognitionID': uniqueName
         }
         table.put_item(Item=image_reference)
 
@@ -252,12 +253,12 @@ def compare(imgFile, username):
     rekognition = boto3.client('rekognition', aws_access_key_id=AWS_ACCESS_KEY, aws_secret_access_key=AWS_SECRET_KEY, region_name=REGION_NAME)
     table = dynamodb.Table(DYNAMODB_TABLE_NAME)
 
-
-    unique_filename = str(uuid.uuid4()) + '_' + imgFile.filename
+    # name = username.split('\\')[1]
+    unique_filename = str(uuid.uuid4()) + '_' + username
 
     try:
         # Retrieve the image reference from DynamoDB
-        response = table.get_item(Key={'Filename': username})
+        response = table.get_item(Key={'rekognitionID': username})
         if 'Item' not in response:
             return 'Image reference not found in DynamoDB', 404
         saved_image_url = response['Item']['S3URL']
@@ -265,7 +266,8 @@ def compare(imgFile, username):
 
 
             # Upload the provided image to S3 temporarily for comparison
-        s3.upload_fileobj(imgFile, BUCKET_NAME, unique_filename)
+        with open(imgFile, 'rb') as imgFile:
+            s3.upload_fileobj(imgFile, BUCKET_NAME, unique_filename)
 
 
 
@@ -290,8 +292,16 @@ def compare(imgFile, username):
         # Optionally, delete the temporary image from S3
         #s3.delete_object(Bucket=BUCKET_NAME, Key=unique_filename)
 
-        returnStr = jsonify(compare_response['FaceMatches'])
-        code = 200
+        returnStrtemp = jsonify(compare_response['FaceMatches'])
+        
+
+        if compare_response['FaceMatches']:
+            returnStr = compare_response['FaceMatches'][0]['Similarity']
+            print(returnStr)
+            code = 200
+        else:
+            returnStr = 'Face not matching'
+            code = 200
 
 
     except Exception as e:
@@ -314,7 +324,7 @@ def CheckFile(name):
     table = dynamodb.Table(DYNAMODB_TABLE_NAME)
     try:
         # Retrieve the image reference from DynamoDB
-        response = table.get_item(Key={'Filename': name})
+        response = table.get_item(Key={'rekognitionID': name})
         if 'Item' not in response:
             log.warning('<---------File not present--------->')
             return False

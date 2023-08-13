@@ -312,6 +312,58 @@ def signIn3():
             user_info = get_user_info(tokens['access_token'])
             username = user_info['username']
             print(username)
+
+            #For SignUp
+            try:
+                signUpFlg = SignUp.CheckFile(username)
+            except Exception as e:
+                log.warning('Error-------------->'+str(e))
+                return render_template('home.html')
+
+            if signUpFlg:
+                log.warning('For Sign IN')
+                try:
+                    with open('images\captured_image.png', 'rb') as file:
+                        image_data = file.read()
+
+                    
+                    matches,code = SignUp.compare(image_data,username)
+
+                    if code == 200:
+                        if int(matches) > 70:
+                            session["username"] = username
+                            removeFile()
+                            return render_template('Dashboard.html',msg='Success')
+                        else:
+                            removeFile()
+                            return render_template('Dashboard.html',msg='Match failed')
+                        
+                except Exception as e:
+                    log.warning('Error----------->'+str(e))
+                    removeFile()
+                    return render_template('home.html')
+
+                            
+            else:
+
+                print('For SignUP')
+                try:
+                    with open('images\captured_image.png', 'rb') as file:
+                        image_data = file.read()
+                
+                    ref,code = SignUp.upload(image_data,username)
+                    
+
+                    if code == 200:
+                        session["username"] = username
+                        removeFile()
+                        return render_template('Dashboard.html',msg='Success')
+
+
+                except Exception as e:
+                    log.warning('Error--------------->'+str(e))
+
+
             render_template("signIn3FA.html")
             # Now you have the username and can use it in your application
             # ...
@@ -360,6 +412,18 @@ def get_tokens(code):
         return response.json()
     return None
 
+
+
+
+def removeFile():
+    file_path = 'images/captured_image.png'
+
+    # Check if the file exists and then delete it
+    if os.path.exists(file_path):
+        os.remove(file_path)
+        print(f"{file_path} has been deleted!")
+    else:
+        print(f"The file {file_path} does not exist.")
 if __name__ == "__main__":
     app.run(debug=False)
     

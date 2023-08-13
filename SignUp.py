@@ -301,7 +301,30 @@ def compare(imgFile, username):
 
     return returnStr,code
 
+def CheckFile(name):
+    log.warning('<----------------Inside SignUp compare----------------->')
 
+    AWS_ACCESS_KEY = 'AKIAW5BFWO2AKMY5FNMW'
+    AWS_SECRET_KEY = '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'
+    REGION_NAME = 'eu-west-1'
+    BUCKET_NAME = 'signin-storage'
+    DYNAMODB_TABLE_NAME = 'users'
+
+    dynamodb = boto3.resource('dynamodb', aws_access_key_id=AWS_ACCESS_KEY, aws_secret_access_key=AWS_SECRET_KEY, region_name=REGION_NAME)
+    table = dynamodb.Table(DYNAMODB_TABLE_NAME)
+    try:
+        # Retrieve the image reference from DynamoDB
+        response = table.get_item(Key={'Filename': name})
+        if 'Item' not in response:
+            log.warning('<---------File not present--------->')
+            return False
+        else:
+            log.warning('<-------File Present---------->')
+            return True
+    except Exception as e:
+        log.warning('Error----------------->'+str(e))
+        return False
+    
 
 def AwsRedirect(roleAR):
     log.warning('<----------------Inisde  SignUp  AWSRedirect------------>')

@@ -5,6 +5,8 @@ import logging as log
 import uuid
 import json
 import requests
+import pyotp
+import qrcode
 
 # Initialize the boto3 client for Cognito
 # client = boto3.client('cognito-idp', region_name='eu-west-1')
@@ -14,6 +16,18 @@ import requests
 
 
 
+def generate_totp_qr_code(username):
+    totp = pyotp.TOTP(pyotp.random_base32())
+    try:
+        provisioning_uri = totp.provisioning_uri(name=username, issuer_name="3FA_Auth")
+    
+        img = qrcode.make(provisioning_uri)
+        img.save(f"static/{username}_qr.png")
+    except Exception as e:
+        log.warning('Error------------>'+str(e))
+    
+    return totp.secret
+
 def SignUpSDK(username,password,phone_number):
     log.warning('<----------------Inside SignUp SignUpSDK----------------->')
 
@@ -22,6 +36,32 @@ def SignUpSDK(username,password,phone_number):
     #CLIENT_ID = '48nhuo85q76h6l3to96rf8f80m'
     USER_POOL_ID = 'eu-west-1_gcF3BMfzC'
     CLIENT_ID = '1e26gho07uf67202g66eeshaas'
+
+
+    totp_secret = generate_totp_qr_code(username)
+
+    # try:
+    #         response = client.sign_up(
+    #             ClientId=CLIENT_ID,
+    #             Username=username,
+    #             Password=password,
+    #             UserAttributes=[
+    #                 {
+    #                     'Name': 'email',
+    #                     'Value': username
+    #                 },
+    #             ]
+    #         )
+    #         log.warning("Signup successful! Please check your phone for MFA code.")
+    #         return True
+    # #"Signup successful! Please check your phone for MFA code."
+    # except Exception as e:
+    #         log.warning("<------------Failed to signup: ------->"+str(e))
+    #         return False
+    # except client.exceptions.UsernameExistsException:
+    #         log.warning('Username already exists.')
+ 
+    # return None
     try:
             response = client.sign_up(
                 ClientId=CLIENT_ID,
@@ -32,18 +72,41 @@ def SignUpSDK(username,password,phone_number):
                         'Name': 'email',
                         'Value': username
                     },
+                    {
+                        'Name': 'custom:totp_secret',
+                        'Value': totp_secret  # Save the TOTP secret as a custom attribute
+                    }
                 ]
             )
-            log.warning("Signup successful! Please check your phone for MFA code.")
+            # Redirect to a page to ask the user to scan the QR code and enter the TOTP to verify
+            #return redirect(url_for('verify_totp', username=username))
             return True
-    #"Signup successful! Please check your phone for MFA code."
     except Exception as e:
-            log.warning("<------------Failed to signup: ------->"+str(e))
+            log.warning(f"Exception during sign-up: {e}")
             return False
-    except client.exceptions.UsernameExistsException:
-            log.warning('Username already exists.')
- 
-    return None
+def verify_totp(username,totp_code):
+
+    client = boto3.client('cognito-idp', region_name='eu-west-1')
+    #USER_POOL_ID = 'eu-west-1_zKGLIBXYH'
+    #CLIENT_ID = '48nhuo85q76h6l3to96rf8f80m'
+    USER_POOL_ID = 'eu-west-1_gcF3BMfzC'
+    CLIENT_ID = '1e26gho07uf67202g66eeshaas'
+
+    # Fetch the TOTP secret from Cognito
+    user = client.admin_get_user(
+        UserPoolId=USER_POOL_ID,
+        Username=username
+    )
+    totp_secret = [attr['Value'] for attr in user['UserAttributes'] if attr['Name'] == 'custom:totp_secret'][0]
+
+    totp = pyotp.TOTP(totp_secret)
+    
+    if totp.verify(totp_code):
+        return True
+
+    else:
+        return False
+
 
 
 def confirmation(username ,mfa_code ):

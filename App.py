@@ -6,6 +6,7 @@ import boto3
 import SignUp
 import json
 import Login
+import requests
 
 
 app = Flask(__name__)
@@ -98,17 +99,12 @@ def login():
             print('Go to signup')
             return render_template("signup.html")
 
-        # role = request.form["role"]
-        # if role == 'role1':
-        #     print('role1')
-        #     redirect_url = redirectRole1()
+        elif flg =='3FA':
+            log.warning('<---------Inside 3FA------------->')
+            redirect_url = redirectRole2()
 
-        #     return redirect(redirect_url,code=302)
-            
-        #     # login()
-        # elif role == 'role2':
-        #     print('role2')
-        #     # login()
+            return redirect(redirect_url,code=302)
+        
     return render_template("home.html")
 
 
@@ -123,7 +119,14 @@ def redirectRole1():
     cognito_auth_url = f"{COGNITO_HOSTED_UI}/login?response_type={RESPONSE_TYPE}&client_id={APP_CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}"
     return cognito_auth_url
 
-
+def redirectRole2():
+    COGNITO_HOSTED_UI = "https://srushti-application.auth.eu-west-1.amazoncognito.com"
+    APP_CLIENT_ID = "19k9ue27jvgsvbrfts5odnlrf6"
+    REDIRECT_URI = "http://localhost:5000/signIn3"  # Where Cognito will redirect after authentication
+    RESPONSE_TYPE = "code"  # Use "code" for Authorization code grant, or "token" for Implicit grant
+    SCOPE = "email+openid+phone"  # OpenID scope, can be adjusted based on needs
+    cognito_auth_url = f"{COGNITO_HOSTED_UI}/login?response_type={RESPONSE_TYPE}&client_id={APP_CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}"
+    return cognito_auth_url
 
 
 @app.route("/signup", methods=["GET", "POST"])
@@ -143,7 +146,8 @@ def signupPg():
             if signUpFlg:
                 msg = "Signup successful! Please check your phone for MFA code."
                 
-                return render_template("OTP.html",otpFlg=True,msg = msg,username=username)
+                #return render_template("OTP.html",otpFlg=True,msg = msg,username=username)
+                return render_template('verify_totp', username=username)
             
             else:
                 msg = "Error in Creation of Account."
@@ -212,9 +216,6 @@ def submitOtp():
         return render_template("OTP.html")
 
 
-
-
-
 @app.route('/awsRedirect',methods=['GET'])
 def awsRedirect():
     log.warning('<---------Inside awsRedirect------------->')
@@ -242,9 +243,110 @@ def awsRedirect():
         return redirect(redirectUrl)
 
         
+@app.route('/verify_totp/<username>', methods=['GET', 'POST'])
+def verify_totp(username):
+    log.warning('<---------Inside verify_totp------------->')
+    if request.method == 'POST':
+        totp_code = request.form['totp_code']
+
+
+        try:
+
+            verify = SignUp.verify_totp(username,totp_code)
+
+
+            if verify:
+                return render_template("home.html")
+            else:
+                return render_template("signup.html")
 
 
 
+
+        except Exception as e:
+            log.warning('Error----------->'+str(e))
+            return render_template("signup.html")
+
+        
+        # # Fetch the TOTP secret from Cognito
+        # user = client.admin_get_user(
+        #     UserPoolId=USER_POOL_ID,
+        #     Username=username
+        # )
+        # totp_secret = [attr['Value'] for attr in user['UserAttributes'] if attr['Name'] == 'custom:totp_secret'][0]
+        
+        # totp = pyotp.TOTP(totp_secret)
+        # if totp.verify(totp_code):
+        #     return "TOTP verified successfully!"
+        # else:
+        #     return "Invalid TOTP code. Please try again."
+
+    return render_template('verify_totp.html', username=username, qr_path=f"{username}_qr.png")
+
+@app.route('/signIn3', methods=['GET'])
+def signIn3():
+    log.warning('<------------Inside SignIn3------------>')
+    if request.method == "POST":
+        username = session['username']
+        render_template("signIn3FA.html")
+
+
+    elif request.method == "GET":
+        #username = session['username']
+        code = request.args.get('code')
+        tokens = get_tokens(code)
+
+        if tokens:
+            user_info = get_user_info(tokens['access_token'])
+            username = user_info['username']
+            print(username)
+            render_template("signIn3FA.html")
+            # Now you have the username and can use it in your application
+            # ...
+        else:
+            return "Error during authentication", 400
+
+
+
+        render_template("signIn3FA.html")
+
+
+def get_user_info(access_token):
+    user_info_url = "https://srushti-application.auth.eu-west-1.amazoncognito.com/oauth2/userInfo"
+    
+    headers = {
+        'Authorization': f'Bearer {access_token}'
+    }
+    
+    response = requests.get(user_info_url, headers=headers)
+    
+    if response.status_code == 200:
+        return response.json()
+    return None
+
+def get_tokens(code):
+    token_url = "https://srushti-application.auth.eu-west-1.amazoncognito.com/oauth2/token"
+    clientId = "19k9ue27jvgsvbrfts5odnlrf6"
+    
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded'
+    }
+    
+    data = {
+        'grant_type': 'authorization_code',
+        'client_id': '19k9ue27jvgsvbrfts5odnlrf6',
+        'code': code,
+        'redirect_uri': 'http://localhost:5000/signIn3'
+    }
+
+    try:
+        response = requests.post(token_url, headers=headers, data=data)
+    except Exception as e:
+        log.warning('Error----------------->'+str(e))
+    
+    if response.status_code == 200:
+        return response.json()
+    return None
 
 if __name__ == "__main__":
     app.run(debug=False)

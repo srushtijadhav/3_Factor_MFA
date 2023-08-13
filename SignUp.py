@@ -300,7 +300,7 @@ def compare(imgFile, username):
             print(returnStr)
             code = 200
         else:
-            returnStr = 'Face not matching'
+            returnStr = 0
             code = 200
 
 

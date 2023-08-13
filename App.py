@@ -327,10 +327,11 @@ def signIn3():
                             removeFile()
                             arn = 'arn:aws:iam::474672952960:role/For_Sec'
                             redirectUrl = SignUp.AwsRedirect(arn)
-                            return render_template('Dashboard.html',msg='Success')
+                            return redirect(redirectUrl)
+                            #return render_template('Dashboard.html',msg='Success')
                         else:
                             removeFile()
-                            return render_template('Dashboard.html',msg='Match failed')
+                            return render_template('home.html',msg='Match failed')
                         
                 except Exception as e:
                     log.warning('Error----------->'+str(e))
@@ -353,8 +354,8 @@ def signIn3():
                         removeFile()
                         arn = 'arn:aws:iam::474672952960:role/sec'
                         redirectUrl = SignUp.AwsRedirect(arn)
-
-                        return render_template('Dashboard.html',msg='Success')
+                        return redirect(redirectUrl)
+                        #return render_template('Dashboard.html',msg='Success')
 
 
                 except Exception as e:

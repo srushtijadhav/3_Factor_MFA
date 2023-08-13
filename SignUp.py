@@ -345,8 +345,8 @@ def AwsRedirect(roleAR):
     
     # Assume role to get temporary credentials
     assumed_role = sts_client.assume_role(
-        #RoleArn=roleAR,
-        RoleArn = 'arn:aws:iam::474672952960:role/role_to_access_s3',
+        RoleArn=roleAR,
+        #RoleArn = 'arn:aws:iam::474672952960:role/role_to_access_s3',
         RoleSessionName="ConsoleAccessSession"
     )
 

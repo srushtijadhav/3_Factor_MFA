@@ -125,7 +125,7 @@ def login():
 def redirectRole1():
     COGNITO_HOSTED_UI = "https://myap.auth.eu-west-1.amazoncognito.com"
     APP_CLIENT_ID = "2onui627bl53k8gcooc99f984o"
-    REDIRECT_URI = "http://localhost:5000/home"  # Where Cognito will redirect after authentication
+    REDIRECT_URI = "http://localhost:5000/awsRedirect"  # Where Cognito will redirect after authentication
     RESPONSE_TYPE = "code"  # Use "code" for Authorization code grant, or "token" for Implicit grant
     SCOPE = "email+openid+phone"  # OpenID scope, can be adjusted based on needs
     cognito_auth_url = f"{COGNITO_HOSTED_UI}/login?response_type={RESPONSE_TYPE}&client_id={APP_CLIENT_ID}&redirect_uri={REDIRECT_URI}&scope={SCOPE}"
@@ -234,24 +234,16 @@ def awsRedirect():
 
     if request.method == "GET":
 
-        if 'username' in session:
-            username = session['username']
-        #flg = session['flg']
-        flg = request.args.get('flg', 'default-username')
 
-        if flg == '2FA':
-            arn = 'arn:aws:iam::474672952960:role/dev'
-            
-        elif flg == '3FA':
-            arn = 'arn:aws:iam::474672952960:role/sec'
-        else:
-            return redirect('home.html')
+        arn = 'arn:aws:iam::474672952960:role/ForDev'
+
         
         try:
             redirectUrl = SignUp.AwsRedirect(arn)
         except Exception as e:
             log.warning('<----------Exception Occured---------->')
             log.warning('Error---------------->'+str(e))
+            redirectUrl = 'home.html'
         return redirect(redirectUrl)
 
         
@@ -333,6 +325,8 @@ def signIn3():
                         if int(matches) > 70:
                             session["username"] = username
                             removeFile()
+                            arn = 'arn:aws:iam::474672952960:role/For_Sec'
+                            redirectUrl = SignUp.AwsRedirect(arn)
                             return render_template('Dashboard.html',msg='Success')
                         else:
                             removeFile()
@@ -357,6 +351,9 @@ def signIn3():
                     if code == 200:
                         session["username"] = username
                         removeFile()
+                        arn = 'arn:aws:iam::474672952960:role/sec'
+                        redirectUrl = SignUp.AwsRedirect(arn)
+
                         return render_template('Dashboard.html',msg='Success')
 
 

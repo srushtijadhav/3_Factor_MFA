@@ -7,6 +7,8 @@ import SignUp
 import json
 import Login
 import requests
+import os
+import base64
 
 
 app = Flask(__name__)
@@ -102,6 +104,16 @@ def login():
         elif flg =='3FA':
             log.warning('<---------Inside 3FA------------->')
             redirect_url = redirectRole2()
+
+            image_data = request.form['image']
+            image_data = base64.b64decode(image_data)
+            image_path = os.path.join('images', 'captured_image.png')
+
+            try:
+                with open(image_path, 'wb') as f:
+                    f.write(image_data)
+            except Exception as e:
+                log.warning('Error--------------->'+str(e))
 
             return redirect(redirect_url,code=302)
         

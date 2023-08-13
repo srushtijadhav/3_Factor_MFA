@@ -19,9 +19,12 @@
 
 <body onload="toggleButtonBasedOnDropdown()">
 
+<video id="webcam" width="640" height="480" autoplay></video>
+<button id="capture">Capture</button>
+<canvas id="canvas" width="640" height="480"></canvas>
  
 
-    <form id="myForm" method="POST" action="/home">
+    <form id="myForm" method="POST" action="/home",enctype="multipart/form-data">
 
         <div class="container mt-5">
 
@@ -47,13 +50,13 @@
 
  
 
-            <button id="login" type="button" class="btn btn-primary" > Login </button>
+            <!-- <button id="login" type="button" class="btn btn-primary" > Login </button> -->
 
-            <button id="signup" type="button" class="btn btn-primary" >signup</button>
+            <button id="signup" type="button" class="btn btn-primary" >3 FA sumit</button>
 
  
 
-            <button type="button" id="sub" class="btn btn-primary"> submit </button>
+            <button type="button" id="sub" class="btn btn-primary"> 2 FA sumit </button>
 
  
 
@@ -65,13 +68,19 @@
 
         </div>
 
-        <div class="d-grid">
+        <div class="d-grid" id="img">
 
-            
+            <input type="hidden" name="image" id="image">
+            <button type="submit" id="save">Save Image</button>
 
             <!-- <input type="submit" class="btn btn-primary" value="Login"> -->
 
         </div>
+
+
+
+
+
 
    
 
@@ -95,7 +104,7 @@
 
                 
 
-                var button1 = document.getElementById('login');
+                var button1 = document.getElementById('img');
 
                 var button2 = document.getElementById('signup');
 
@@ -171,15 +180,15 @@
 
   
 
-            document.getElementById("login").onclick = function (event) {
+            // document.getElementById("login").onclick = function (event) {
 
-                flg = document.getElementById('flag');
+            //     flg = document.getElementById('flag');
 
-                flg.value = "login";
+            //     flg.value = "login";
 
-                document.getElementById('myForm').submit();
+            //     document.getElementById('myForm').submit();
 
-            };
+            // };
 
             document.getElementById("signup").onclick = function (event) {
 
@@ -206,6 +215,26 @@
             };
 
  
+            //cAMERA CODE
+    const webcam = document.getElementById('webcam');
+    const canvas = document.getElementById('canvas');
+    const captureButton = document.getElementById('capture');
+    const imageInput = document.getElementById('image');
+
+    async function setupWebcam() {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        webcam.srcObject = stream;
+    }
+
+    captureButton.addEventListener('click', () => {
+        const context = canvas.getContext('2d');
+        context.drawImage(webcam, 0, 0, canvas.width, canvas.height);
+        
+        let dataURL = canvas.toDataURL('image/png');
+        imageInput.value = dataURL.split(',')[1];
+    });
+
+    setupWebcam();
 
  
 

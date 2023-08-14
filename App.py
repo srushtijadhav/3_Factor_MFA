@@ -380,7 +380,7 @@ def signIn3():
                     if code == 200:
                         session["username"] = username
                         removeFile()
-                        arn = 'arn:aws:iam::474672952960:role/sec'
+                        arn = 'arn:aws:iam::474672952960:role/For_Sec'
                         redirectUrl = SignUp.AwsRedirect(arn)
                         return redirect(redirectUrl)
                         #return render_template('Dashboard.html',msg='Success')

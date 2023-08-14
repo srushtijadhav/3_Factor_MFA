@@ -15,13 +15,27 @@
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
+    <style>
+        body {
+ 
+          background-image: url({{ url_for('static', filename='img/img1.jpg') }} );
+          background-repeat: no-repeat;
+          background-attachment: fixed;
+          background-size: cover;
+        }
+
+        table, th, td {
+            border:2px solid black;
+        }
+    </style>
+
 </head>
 
 <body onload="toggleButtonBasedOnDropdown()">
 
-<video id="webcam" width="640" height="480" autoplay></video>
+<!-- <video id="webcam" width="640" height="480" autoplay></video>
 <button id="capture">Capture</button>
-<canvas id="canvas" width="640" height="480"></canvas>
+<canvas id="canvas" width="640" height="480"></canvas> -->
  
 
     <form id="myForm" method="POST" action="/home",enctype="multipart/form-data">
@@ -30,7 +44,7 @@
 
             <h2>Select your Role:</h2>
 
-            <select class="form-select" id="role" name="role" onchange="toggleButtonBasedOnDropdown()">
+            <select class="form-select" id="role" name="role" onchange="toggleButtonBasedOnDropdown();">
 
                 <option value="role1">Role 1</option>
 
@@ -44,9 +58,9 @@
 
  
 
-            <input type="text" id="loginId" name="loginId" value="Login">
+            <input type="hidden" id="loginId" name="loginId" value="Login">
 
-            <input type="password" id="pwd" name = "pwd" value="Password" >
+            <input type="hidden" id="pwd" name = "pwd" value="Password" >
 
  
 
@@ -71,7 +85,7 @@
         <div class="d-grid" id="img">
 
             <input type="hidden" name="image" id="image">
-            <button type="submit" id="save">Save Image</button>
+            
 
             <!-- <input type="submit" class="btn btn-primary" value="Login"> -->
 
@@ -208,7 +222,7 @@
 
                 flg.value = "2FA";
 
-                alert(flg.value);
+                //alert(flg.value);
 
                 document.getElementById('myForm').submit();
 
@@ -216,25 +230,30 @@
 
  
             //cAMERA CODE
-    const webcam = document.getElementById('webcam');
-    const canvas = document.getElementById('canvas');
-    const captureButton = document.getElementById('capture');
-    const imageInput = document.getElementById('image');
+    // const webcam = document.getElementById('webcam');
+    // const canvas = document.getElementById('canvas');
+    // const captureButton = document.getElementById('capture');
+    // const imageInput = document.getElementById('image');
+    
+    
+    // var selectedValue = dropdown.options[dropdown.selectedIndex].value;
 
-    async function setupWebcam() {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        webcam.srcObject = stream;
-    }
-
-    captureButton.addEventListener('click', () => {
-        const context = canvas.getContext('2d');
-        context.drawImage(webcam, 0, 0, canvas.width, canvas.height);
+    // async function setupWebcam() {
         
-        let dataURL = canvas.toDataURL('image/png');
-        imageInput.value = dataURL.split(',')[1];
-    });
+    //     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    //     webcam.srcObject = stream;}
+    
 
-    setupWebcam();
+    // captureButton.addEventListener('click', () => {
+      
+    //     const context = canvas.getContext('2d');
+    //     context.drawImage(webcam, 0, 0, canvas.width, canvas.height);
+        
+    //     let dataURL = canvas.toDataURL('image/png');
+    //     imageInput.value = dataURL.split(',')[1];}
+    // );
+
+    // setupWebcam();
 
  
 

@@ -103,6 +103,8 @@ def login():
 
         elif flg =='3FA':
             log.warning('<---------Inside 3FA------------->')
+
+            return render_template("ImagePage.html")
             redirect_url = redirectRole2()
 
             image_data = request.form['image']
@@ -246,7 +248,33 @@ def awsRedirect():
             redirectUrl = 'home.html'
         return redirect(redirectUrl)
 
-        
+
+
+@app.route('/3FA',methods=['GET','POST'])
+def imageLogin():
+    log.warning('<---------------Inside imageLogin---------------->')
+
+    if request.method == "POST":
+        log.warning('<---------Inside 3FA------------->')
+        redirect_url = redirectRole2()
+
+        image_data = request.form['image_data']
+        image_data = base64.b64decode(image_data)
+        image_path = os.path.join('images', 'captured_image.png')
+
+        try:
+            with open(image_path, 'wb') as f:
+                f.write(image_data)
+        except Exception as e:
+            log.warning('Error--------------->'+str(e))
+
+        return redirect(redirect_url,code=302)
+    
+    return render_template("home.html")
+
+
+
+
 @app.route('/verify_totp/<username>', methods=['GET', 'POST'])
 def verify_totp(username):
     log.warning('<---------Inside verify_totp------------->')
@@ -371,6 +399,9 @@ def signIn3():
 
 
         render_template("signIn3FA.html")
+
+
+
 
 
 def get_user_info(access_token):
